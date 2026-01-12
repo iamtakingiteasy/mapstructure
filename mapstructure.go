@@ -218,6 +218,17 @@ type DecodeHookFuncKind func(reflect.Kind, reflect.Kind, any) (any, error)
 // values.
 type DecodeHookFuncValue func(from reflect.Value, to reflect.Value) (any, error)
 
+// Unmarshaler is the interface implemented by types that can unmarshal
+// themselves. UnmarshalMapstructure receives the input data (potentially
+// transformed by DecodeHook) and should populate the receiver with the
+// decoded values.
+//
+// The Unmarshaler interface takes precedence over the default decoding
+// logic for any type (structs, slices, maps, primitives, etc.).
+type Unmarshaler interface {
+	UnmarshalMapstructure(any) error
+}
+
 // DecoderConfig is the configuration that is used to create a new decoder
 // and allows customization of various aspects of decoding.
 type DecoderConfig struct {
@@ -340,6 +351,11 @@ type DecoderConfig struct {
 	// the initial lookup. If not found, MatchName is used as a fallback comparison.
 	// Explicit struct tags always take precedence over MapFieldName.
 	MapFieldName func(string) string
+
+	// DisableUnmarshaler, if set to true, disables the use of the Unmarshaler
+	// interface. Types implementing Unmarshaler will be decoded using the
+	// standard struct decoding logic instead.
+	DisableUnmarshaler bool
 }
 
 // A Decoder takes a raw interface value and turns it into structured
@@ -577,36 +593,50 @@ func (d *Decoder) decode(name string, input any, outVal reflect.Value) error {
 
 	var err error
 	addMetaKey := true
-	switch outputKind {
-	case reflect.Bool:
-		err = d.decodeBool(name, input, outVal)
-	case reflect.Interface:
-		err = d.decodeBasic(name, input, outVal)
-	case reflect.String:
-		err = d.decodeString(name, input, outVal)
-	case reflect.Int:
-		err = d.decodeInt(name, input, outVal)
-	case reflect.Uint:
-		err = d.decodeUint(name, input, outVal)
-	case reflect.Float32:
-		err = d.decodeFloat(name, input, outVal)
-	case reflect.Complex64:
-		err = d.decodeComplex(name, input, outVal)
-	case reflect.Struct:
-		err = d.decodeStruct(name, input, outVal)
-	case reflect.Map:
-		err = d.decodeMap(name, input, outVal)
-	case reflect.Ptr:
-		addMetaKey, err = d.decodePtr(name, input, outVal)
-	case reflect.Slice:
-		err = d.decodeSlice(name, input, outVal)
-	case reflect.Array:
-		err = d.decodeArray(name, input, outVal)
-	case reflect.Func:
-		err = d.decodeFunc(name, input, outVal)
-	default:
-		// If we reached this point then we weren't able to decode it
-		return newDecodeError(name, fmt.Errorf("unsupported type: %s", outputKind))
+
+	// Check if the target implements Unmarshaler and use it if not disabled
+	unmarshaled := false
+	if !d.config.DisableUnmarshaler {
+		if unmarshaler, ok := getUnmarshaler(outVal); ok {
+			if err = unmarshaler.UnmarshalMapstructure(input); err != nil {
+				err = newDecodeError(name, err)
+			}
+			unmarshaled = true
+		}
+	}
+
+	if !unmarshaled {
+		switch outputKind {
+		case reflect.Bool:
+			err = d.decodeBool(name, input, outVal)
+		case reflect.Interface:
+			err = d.decodeBasic(name, input, outVal)
+		case reflect.String:
+			err = d.decodeString(name, input, outVal)
+		case reflect.Int:
+			err = d.decodeInt(name, input, outVal)
+		case reflect.Uint:
+			err = d.decodeUint(name, input, outVal)
+		case reflect.Float32:
+			err = d.decodeFloat(name, input, outVal)
+		case reflect.Complex64:
+			err = d.decodeComplex(name, input, outVal)
+		case reflect.Struct:
+			err = d.decodeStruct(name, input, outVal)
+		case reflect.Map:
+			err = d.decodeMap(name, input, outVal)
+		case reflect.Ptr:
+			addMetaKey, err = d.decodePtr(name, input, outVal)
+		case reflect.Slice:
+			err = d.decodeSlice(name, input, outVal)
+		case reflect.Array:
+			err = d.decodeArray(name, input, outVal)
+		case reflect.Func:
+			err = d.decodeFunc(name, input, outVal)
+		default:
+			// If we reached this point then we weren't able to decode it
+			return newDecodeError(name, fmt.Errorf("unsupported type: %s", outputKind))
+		}
 	}
 
 	// If we reached here, then we successfully decoded SOMETHING, so
@@ -1859,4 +1889,41 @@ func splitTagNames(tagName string) []string {
 	}
 
 	return result
+}
+
+// unmarshalerType is cached for performance
+var unmarshalerType = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
+
+// getUnmarshaler checks if the value implements Unmarshaler and returns
+// the Unmarshaler and a boolean indicating if it was found. It handles both
+// pointer and value receivers.
+func getUnmarshaler(val reflect.Value) (Unmarshaler, bool) {
+	// Skip invalid or nil values
+	if !val.IsValid() {
+		return nil, false
+	}
+
+	switch val.Kind() {
+	case reflect.Pointer, reflect.Interface:
+		if val.IsNil() {
+			return nil, false
+		}
+	}
+
+	// Check pointer receiver first (most common case)
+	if val.CanAddr() {
+		ptrVal := val.Addr()
+		// Quick check: if no methods, can't implement any interface
+		if ptrVal.Type().NumMethod() > 0 && ptrVal.Type().Implements(unmarshalerType) {
+			return ptrVal.Interface().(Unmarshaler), true
+		}
+	}
+
+	// Check value receiver
+	// Quick check: if no methods, can't implement any interface
+	if val.Type().NumMethod() > 0 && val.CanInterface() && val.Type().Implements(unmarshalerType) {
+		return val.Interface().(Unmarshaler), true
+	}
+
+	return nil, false
 }
