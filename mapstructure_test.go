@@ -3688,6 +3688,8 @@ type TestMapFieldName struct {
 }
 
 func TestDecoder_MapFieldNameMapFromStruct(t *testing.T) {
+	t.Parallel()
+
 	var structKeys map[string]any
 
 	decoder, err := NewDecoder(&DecoderConfig{
@@ -3723,6 +3725,8 @@ func TestDecoder_MapFieldNameMapFromStruct(t *testing.T) {
 }
 
 func TestDecoder_MapFieldNameStructFromMap(t *testing.T) {
+	t.Parallel()
+
 	foo := TestMapFieldName{}
 
 	decoder, err := NewDecoder(&DecoderConfig{
@@ -3757,5 +3761,98 @@ func TestDecoder_MapFieldNameStructFromMap(t *testing.T) {
 
 	if foo.Username != "bar" {
 		t.Fatal("expected Username to be bar")
+	}
+}
+
+func TestDecoder_MapFieldNameWithMatchName(t *testing.T) {
+	t.Parallel()
+
+	type Target struct {
+		HostName string
+		Username string
+	}
+
+	input := map[string]any{
+		"HOST_NAME": "server1",
+		"user_name": "admin",
+	}
+
+	var result Target
+	decoder, err := NewDecoder(&DecoderConfig{
+		Result: &result,
+		MapFieldName: func(s string) string {
+			// Convert HostName -> host_name, Username -> user_name
+			if s == "HostName" {
+				return "host_name"
+			}
+			if s == "Username" {
+				return "user_name"
+			}
+			return s
+		},
+		MatchName: strings.EqualFold, // Case-insensitive fallback
+	})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = decoder.Decode(input)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	// HOST_NAME should match host_name via case-insensitive MatchName
+	if result.HostName != "server1" {
+		t.Fatalf("expected HostName to be 'server1', got '%s'", result.HostName)
+	}
+
+	// user_name matches exactly
+	if result.Username != "admin" {
+		t.Fatalf("expected Username to be 'admin', got '%s'", result.Username)
+	}
+}
+
+func TestDecoder_MapFieldNameWithIgnoreUntaggedFields(t *testing.T) {
+	t.Parallel()
+
+	type Target struct {
+		TaggedField   string `mapstructure:"tagged_field"`
+		UntaggedField string
+	}
+
+	input := map[string]any{
+		"tagged_field":   "tagged_value",
+		"untagged_field": "untagged_value",
+	}
+
+	var result Target
+	decoder, err := NewDecoder(&DecoderConfig{
+		Result:               &result,
+		IgnoreUntaggedFields: true,
+		MapFieldName: func(s string) string {
+			// This would convert UntaggedField -> untagged_field,
+			// but IgnoreUntaggedFields takes precedence
+			if s == "UntaggedField" {
+				return "untagged_field"
+			}
+			return s
+		},
+	})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	err = decoder.Decode(input)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.TaggedField != "tagged_value" {
+		t.Fatalf("expected TaggedField to be 'tagged_value', got '%s'", result.TaggedField)
+	}
+
+	// UntaggedField should remain empty because IgnoreUntaggedFields is true
+	if result.UntaggedField != "" {
+		t.Fatalf("expected UntaggedField to be empty due to IgnoreUntaggedFields, got '%s'", result.UntaggedField)
 	}
 }

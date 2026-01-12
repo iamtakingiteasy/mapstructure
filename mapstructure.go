@@ -311,6 +311,9 @@ type DecoderConfig struct {
 	// MatchName is the function used to match the map key to the struct
 	// field name or tag. Defaults to `strings.EqualFold`. This can be used
 	// to implement case-sensitive tag values, support snake casing, etc.
+	//
+	// MatchName is used as a fallback comparison when the direct key lookup fails.
+	// See also MapFieldName for transforming field names before lookup.
 	MatchName func(mapKey, fieldName string) bool
 
 	// DecodeNil, if set to true, will cause the DecodeHook (if present) to run
@@ -318,7 +321,18 @@ type DecoderConfig struct {
 	DecodeNil bool
 
 	// MapFieldName is the function used to convert the struct field name to the map's key name.
-	// This can be used to support snake casing, etc., without explicitly mapping each name.
+	//
+	// This is useful for automatically converting between naming conventions without
+	// explicitly tagging each field. For example, to convert Go's PascalCase field names
+	// to snake_case map keys:
+	//
+	//	MapFieldName: func(s string) string {
+	//	    return strcase.ToSnake(s)
+	//	}
+	//
+	// When decoding from a map to a struct, the transformed field name is used for
+	// the initial lookup. If not found, MatchName is used as a fallback comparison.
+	// Explicit struct tags always take precedence over MapFieldName.
 	MapFieldName func(string) string
 }
 
