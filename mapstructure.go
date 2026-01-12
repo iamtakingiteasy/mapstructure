@@ -297,7 +297,9 @@ type DecoderConfig struct {
 	Result any
 
 	// The tag name that mapstructure reads for field names. This
-	// defaults to "mapstructure"
+	// defaults to "mapstructure". Multiple tag names can be specified
+	// as a comma-separated list (e.g., "yaml,json"), and the first
+	// matching non-empty tag will be used.
 	TagName string
 
 	// The option of the value in the tag that indicates a field should
@@ -1843,8 +1845,14 @@ func splitTagNames(tagName string) []string {
 		return []string{"mapstructure"}
 	}
 	parts := strings.Split(tagName, ",")
-	for i, name := range parts {
-		parts[i] = strings.TrimSpace(name)
+	result := make([]string, 0, len(parts))
+
+	for _, name := range parts {
+		name = strings.TrimSpace(name)
+		if name != "" {
+			result = append(result, name)
+		}
 	}
-	return parts
+
+	return result
 }
