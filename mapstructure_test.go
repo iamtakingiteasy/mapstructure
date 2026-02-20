@@ -3859,44 +3859,791 @@ func TestDecoder_ErrorUnused_EmbeddedStruct_QualifiedTypeName(t *testing.T) {
 
 func TestDecode_structArrayDeepMap(t *testing.T) {
 	type SourceChild struct {
-		String string `mapstructure:"some-string"`
+		String string `mapstructure:"field"`
 	}
 
 	type SourceParent struct {
-		ChildrenA []SourceChild  `mapstructure:"children-a,deep"`
-		ChildrenB *[]SourceChild `mapstructure:"children-b,deep"`
+		SE        []SourceChild                   `mapstructure:"s-e,deep"`
+		SPE       *[]SourceChild                  `mapstructure:"s-p-e,deep"`
+		SPPE      **[]SourceChild                 `mapstructure:"s-p-p-e,deep"`
+		SEP       []*SourceChild                  `mapstructure:"s-e-p,deep"`
+		SPEP      *[]*SourceChild                 `mapstructure:"s-p-e-p,deep"`
+		SPPEP     **[]*SourceChild                `mapstructure:"s-p-p-e-p,deep"`
+		SEPP      []**SourceChild                 `mapstructure:"s-e-p-p,deep"`
+		SPEPP     *[]**SourceChild                `mapstructure:"s-p-e-p-p,deep"`
+		SPPEPP    **[]**SourceChild               `mapstructure:"s-p-p-e-p-p,deep"`
+		AE        [1]SourceChild                  `mapstructure:"a-e,deep"`
+		APE       *[1]SourceChild                 `mapstructure:"a-p-e,deep"`
+		APPE      **[1]SourceChild                `mapstructure:"a-p-p-e,deep"`
+		AEP       [1]*SourceChild                 `mapstructure:"a-e-p,deep"`
+		APEP      *[1]*SourceChild                `mapstructure:"a-p-e-p,deep"`
+		APPEP     **[1]*SourceChild               `mapstructure:"a-p-p-e-p,deep"`
+		AEPP      [1]**SourceChild                `mapstructure:"a-e-p-p,deep"`
+		APEPP     *[1]**SourceChild               `mapstructure:"a-p-e-p-p,deep"`
+		APPEPP    **[1]**SourceChild              `mapstructure:"a-p-p-e-p-p,deep"`
+		ME        map[string]SourceChild          `mapstructure:"m-e,deep"`
+		MPE       *map[string]SourceChild         `mapstructure:"m-p-e,deep"`
+		MPPE      **map[string]SourceChild        `mapstructure:"m-p-p-e,deep"`
+		MEP       map[string]*SourceChild         `mapstructure:"m-e-p,deep"`
+		MPEP      *map[string]*SourceChild        `mapstructure:"m-p-e-p,deep"`
+		MPPEP     **map[string]*SourceChild       `mapstructure:"m-p-p-e-p,deep"`
+		MEPP      map[string]**SourceChild        `mapstructure:"m-e-p-p,deep"`
+		MPEPP     *map[string]**SourceChild       `mapstructure:"m-p-e-p-p,deep"`
+		MPPEPP    **map[string]**SourceChild      `mapstructure:"m-p-p-e-p-p,deep"`
+		MSE       map[string][]SourceChild        `mapstructure:"m-s-e,deep"`
+		MPSE      *map[string][]SourceChild       `mapstructure:"m-p-s-e,deep"`
+		MPPSE     **map[string][]SourceChild      `mapstructure:"m-p-p-s-e,deep"`
+		MSPE      map[string]*[]SourceChild       `mapstructure:"m-s-p-e,deep"`
+		MPSPE     *map[string]*[]SourceChild      `mapstructure:"m-p-s-p-e,deep"`
+		MPPSPE    **map[string]*[]SourceChild     `mapstructure:"m-p-p-s-p-e,deep"`
+		MSPPE     map[string]**[]SourceChild      `mapstructure:"m-s-p-p-e,deep"`
+		MPSPPE    *map[string]**[]SourceChild     `mapstructure:"m-p-s-p-p-e,deep"`
+		MPPSPPE   **map[string]**[]SourceChild    `mapstructure:"m-p-p-s-p-p-e,deep"`
+		MAE       map[string][1]SourceChild       `mapstructure:"m-a-e,deep"`
+		MPAE      *map[string][1]SourceChild      `mapstructure:"m-p-a-e,deep"`
+		MPPAE     **map[string][1]SourceChild     `mapstructure:"m-p-p-a-e,deep"`
+		MAPE      map[string]*[1]SourceChild      `mapstructure:"m-a-p-e,deep"`
+		MPAPE     *map[string]*[1]SourceChild     `mapstructure:"m-p-a-p-e,deep"`
+		MPPAPE    **map[string]*[1]SourceChild    `mapstructure:"m-p-p-a-p-e,deep"`
+		MAPPE     map[string]**[1]SourceChild     `mapstructure:"m-a-p-p-e,deep"`
+		MPAPPE    *map[string]**[1]SourceChild    `mapstructure:"m-p-a-p-p-e,deep"`
+		MPPAPPE   **map[string]**[1]SourceChild   `mapstructure:"m-p-p-a-p-p-e,deep"`
+		MSEP      map[string][]*SourceChild       `mapstructure:"m-s-e-p,deep"`
+		MPSEP     *map[string][]*SourceChild      `mapstructure:"m-p-s-e-p,deep"`
+		MPPSEP    **map[string][]*SourceChild     `mapstructure:"m-p-p-s-e-p,deep"`
+		MSPEP     map[string]*[]*SourceChild      `mapstructure:"m-s-p-e-p,deep"`
+		MPSPEP    *map[string]*[]*SourceChild     `mapstructure:"m-p-s-p-e-p,deep"`
+		MPPSPEP   **map[string]*[]*SourceChild    `mapstructure:"m-p-p-s-p-e-p,deep"`
+		MSPPEP    map[string]**[]*SourceChild     `mapstructure:"m-s-p-p-e-p,deep"`
+		MPSPPEP   *map[string]**[]*SourceChild    `mapstructure:"m-p-s-p-p-e-p,deep"`
+		MPPSPPEP  **map[string]**[]*SourceChild   `mapstructure:"m-p-p-s-p-p-e-p,deep"`
+		MAEP      map[string][1]*SourceChild      `mapstructure:"m-a-e-p,deep"`
+		MPAEP     *map[string][1]*SourceChild     `mapstructure:"m-p-a-e-p,deep"`
+		MPPAEP    **map[string][1]*SourceChild    `mapstructure:"m-p-p-a-e-p,deep"`
+		MAPEP     map[string]*[1]*SourceChild     `mapstructure:"m-a-p-e-p,deep"`
+		MPAPEP    *map[string]*[1]*SourceChild    `mapstructure:"m-p-a-p-e-p,deep"`
+		MPPAPEP   **map[string]*[1]*SourceChild   `mapstructure:"m-p-p-a-p-e-p,deep"`
+		MAPPEP    map[string]**[1]*SourceChild    `mapstructure:"m-a-p-p-e-p,deep"`
+		MPAPPEP   *map[string]**[1]*SourceChild   `mapstructure:"m-p-a-p-p-e-p,deep"`
+		MPPAPPEP  **map[string]**[1]*SourceChild  `mapstructure:"m-p-p-a-p-p-e-p,deep"`
+		MSEPP     map[string][]**SourceChild      `mapstructure:"m-s-e-p-p,deep"`
+		MPSEPP    *map[string][]**SourceChild     `mapstructure:"m-p-s-e-p-p,deep"`
+		MPPSEPP   **map[string][]**SourceChild    `mapstructure:"m-p-p-s-e-p-p,deep"`
+		MSPEPP    map[string]*[]**SourceChild     `mapstructure:"m-s-p-e-p-p,deep"`
+		MPSPEPP   *map[string]*[]**SourceChild    `mapstructure:"m-p-s-p-e-p-p,deep"`
+		MPPSPEPP  **map[string]*[]**SourceChild   `mapstructure:"m-p-p-s-p-e-p-p,deep"`
+		MSPPEPP   map[string]**[]**SourceChild    `mapstructure:"m-s-p-p-e-p-p,deep"`
+		MPSPPEPP  *map[string]**[]**SourceChild   `mapstructure:"m-p-s-p-p-e-p-p,deep"`
+		MPPSPPEPP **map[string]**[]**SourceChild  `mapstructure:"m-p-p-s-p-p-e-p-p,deep"`
+		MAEPP     map[string][1]**SourceChild     `mapstructure:"m-a-e-p-p,deep"`
+		MPAEPP    *map[string][1]**SourceChild    `mapstructure:"m-p-a-e-p-p,deep"`
+		MPPAEPP   **map[string][1]**SourceChild   `mapstructure:"m-p-p-a-e-p-p,deep"`
+		MAPEPP    map[string]*[1]**SourceChild    `mapstructure:"m-a-p-e-p-p,deep"`
+		MPAPEPP   *map[string]*[1]**SourceChild   `mapstructure:"m-p-a-p-e-p-p,deep"`
+		MPPAPEPP  **map[string]*[1]**SourceChild  `mapstructure:"m-p-p-a-p-e-p-p,deep"`
+		MAPPEPP   map[string]**[1]**SourceChild   `mapstructure:"m-a-p-p-e-p-p,deep"`
+		MPAPPEPP  *map[string]**[1]**SourceChild  `mapstructure:"m-p-a-p-p-e-p-p,deep"`
+		MPPAPPEPP **map[string]**[1]**SourceChild `mapstructure:"m-p-p-a-p-p-e-p-p,deep"`
 	}
+
+	e := SourceChild{String: "el"}
+	ep := &e
+	epp := &ep
+
+	se := []SourceChild{e}
+	spe := &se
+	sppe := &spe
+
+	sep := []*SourceChild{ep}
+	spep := &sep
+	sppep := &spep
+
+	sepp := []**SourceChild{epp}
+	spepp := &sepp
+	sppepp := &spepp
+
+	ae := [1]SourceChild{e}
+	ape := &ae
+	appe := &ape
+
+	aep := [1]*SourceChild{ep}
+	apep := &aep
+	appep := &apep
+
+	aepp := [1]**SourceChild{epp}
+	apepp := &aepp
+	appepp := &apepp
+
+	me := map[string]SourceChild{"foo": e}
+	mpe := &me
+	mppe := &mpe
+
+	mep := map[string]*SourceChild{"foo": ep}
+	mpep := &mep
+	mppep := &mpep
+
+	mepp := map[string]**SourceChild{"foo": epp}
+	mpepp := &mepp
+	mppepp := &mpepp
+
+	mse := map[string][]SourceChild{"foo": se}
+	mpse := &mse
+	mppse := &mpse
+
+	mspe := map[string]*[]SourceChild{"foo": spe}
+	mpspe := &mspe
+	mppspe := &mpspe
+
+	msppe := map[string]**[]SourceChild{"foo": sppe}
+	mpsppe := &msppe
+	mppsppe := &mpsppe
+
+	mae := map[string][1]SourceChild{"foo": ae}
+	mpae := &mae
+	mppae := &mpae
+
+	mape := map[string]*[1]SourceChild{"foo": ape}
+	mpape := &mape
+	mppape := &mpape
+
+	mappe := map[string]**[1]SourceChild{"foo": appe}
+	mpappe := &mappe
+	mppappe := &mpappe
+
+	msep := map[string][]*SourceChild{"foo": sep}
+	mpsep := &msep
+	mppsep := &mpsep
+
+	mspep := map[string]*[]*SourceChild{"foo": spep}
+	mpspep := &mspep
+	mppspep := &mpspep
+
+	msppep := map[string]**[]*SourceChild{"foo": sppep}
+	mpsppep := &msppep
+	mppsppep := &mpsppep
+
+	maep := map[string][1]*SourceChild{"foo": aep}
+	mpaep := &maep
+	mppaep := &mpaep
+
+	mapep := map[string]*[1]*SourceChild{"foo": apep}
+	mpapep := &mapep
+	mppapep := &mpapep
+
+	mappep := map[string]**[1]*SourceChild{"foo": appep}
+	mpappep := &mappep
+	mppappep := &mpappep
+
+	msepp := map[string][]**SourceChild{"foo": sepp}
+	mpsepp := &msepp
+	mppsepp := &mpsepp
+
+	mspepp := map[string]*[]**SourceChild{"foo": spepp}
+	mpspepp := &mspepp
+	mppspepp := &mpspepp
+
+	msppepp := map[string]**[]**SourceChild{"foo": sppepp}
+	mpsppepp := &msppepp
+	mppsppepp := &mpsppepp
+
+	maepp := map[string][1]**SourceChild{"foo": aepp}
+	mpaepp := &maepp
+	mppaepp := &mpaepp
+
+	mapepp := map[string]*[1]**SourceChild{"foo": apepp}
+	mpapepp := &mapepp
+	mppapepp := &mpapepp
+
+	mappepp := map[string]**[1]**SourceChild{"foo": appepp}
+	mpappepp := &mappepp
+	mppappepp := &mpappepp
 
 	var target map[string]any
 
 	source := SourceParent{
-		ChildrenA: []SourceChild{
-			{String: "one"},
-			{String: "two"},
-		},
-		ChildrenB: &[]SourceChild{
-			{String: "one"},
-			{String: "two"},
-		},
+		SE:        se,
+		SPE:       spe,
+		SPPE:      sppe,
+		SEP:       sep,
+		SPEP:      spep,
+		SPPEP:     sppep,
+		SEPP:      sepp,
+		SPEPP:     spepp,
+		SPPEPP:    sppepp,
+		AE:        ae,
+		APE:       ape,
+		APPE:      appe,
+		AEP:       aep,
+		APEP:      apep,
+		APPEP:     appep,
+		AEPP:      aepp,
+		APEPP:     apepp,
+		APPEPP:    appepp,
+		ME:        me,
+		MPE:       mpe,
+		MPPE:      mppe,
+		MEP:       mep,
+		MPEP:      mpep,
+		MPPEP:     mppep,
+		MEPP:      mepp,
+		MPEPP:     mpepp,
+		MPPEPP:    mppepp,
+		MSE:       mse,
+		MPSE:      mpse,
+		MPPSE:     mppse,
+		MSPE:      mspe,
+		MPSPE:     mpspe,
+		MPPSPE:    mppspe,
+		MSPPE:     msppe,
+		MPSPPE:    mpsppe,
+		MPPSPPE:   mppsppe,
+		MAE:       mae,
+		MPAE:      mpae,
+		MPPAE:     mppae,
+		MAPE:      mape,
+		MPAPE:     mpape,
+		MPPAPE:    mppape,
+		MAPPE:     mappe,
+		MPAPPE:    mpappe,
+		MPPAPPE:   mppappe,
+		MSEP:      msep,
+		MPSEP:     mpsep,
+		MPPSEP:    mppsep,
+		MSPEP:     mspep,
+		MPSPEP:    mpspep,
+		MPPSPEP:   mppspep,
+		MSPPEP:    msppep,
+		MPSPPEP:   mpsppep,
+		MPPSPPEP:  mppsppep,
+		MAEP:      maep,
+		MPAEP:     mpaep,
+		MPPAEP:    mppaep,
+		MAPEP:     mapep,
+		MPAPEP:    mpapep,
+		MPPAPEP:   mppapep,
+		MAPPEP:    mappep,
+		MPAPPEP:   mpappep,
+		MPPAPPEP:  mppappep,
+		MSEPP:     msepp,
+		MPSEPP:    mpsepp,
+		MPPSEPP:   mppsepp,
+		MSPEPP:    mspepp,
+		MPSPEPP:   mpspepp,
+		MPPSPEPP:  mppspepp,
+		MSPPEPP:   msppepp,
+		MPSPPEPP:  mpsppepp,
+		MPPSPPEPP: mppsppepp,
+		MAEPP:     maepp,
+		MPAEPP:    mpaepp,
+		MPPAEPP:   mppaepp,
+		MAPEPP:    mapepp,
+		MPAPEPP:   mpapepp,
+		MPPAPEPP:  mppapepp,
+		MAPPEPP:   mappepp,
+		MPAPPEPP:  mpappepp,
+		MPPAPPEPP: mppappepp,
 	}
 
 	if err := Decode(source, &target); err != nil {
 		t.Fatalf("got error: %s", err)
 	}
 
+	sliceValue := []map[string]any{{"field": "el"}}
+	arrayValue := [1]map[string]any{{"field": "el"}}
+	mapValue := map[string]map[string]any{"foo": {"field": "el"}}
+	mapSliceValue := map[string][]map[string]any{"foo": {{"field": "el"}}}
+	mapArrayValue := map[string][1]map[string]any{"foo": {{"field": "el"}}}
+
 	expected := map[string]any{
-		"children-a": []map[string]any{
-			{"some-string": "one"},
-			{"some-string": "two"},
-		},
-		"children-b": []map[string]any{
-			{"some-string": "one"},
-			{"some-string": "two"},
-		},
+		"s-e":               sliceValue,
+		"s-p-e":             sliceValue,
+		"s-p-p-e":           sliceValue,
+		"s-e-p":             sliceValue,
+		"s-p-e-p":           sliceValue,
+		"s-p-p-e-p":         sliceValue,
+		"s-e-p-p":           sliceValue,
+		"s-p-e-p-p":         sliceValue,
+		"s-p-p-e-p-p":       sliceValue,
+		"a-e":               arrayValue,
+		"a-p-e":             arrayValue,
+		"a-p-p-e":           arrayValue,
+		"a-e-p":             arrayValue,
+		"a-p-e-p":           arrayValue,
+		"a-p-p-e-p":         arrayValue,
+		"a-e-p-p":           arrayValue,
+		"a-p-e-p-p":         arrayValue,
+		"a-p-p-e-p-p":       arrayValue,
+		"m-e":               mapValue,
+		"m-p-e":             mapValue,
+		"m-p-p-e":           mapValue,
+		"m-e-p":             mapValue,
+		"m-p-e-p":           mapValue,
+		"m-p-p-e-p":         mapValue,
+		"m-e-p-p":           mapValue,
+		"m-p-e-p-p":         mapValue,
+		"m-p-p-e-p-p":       mapValue,
+		"m-s-e":             mapSliceValue,
+		"m-p-s-e":           mapSliceValue,
+		"m-p-p-s-e":         mapSliceValue,
+		"m-s-p-e":           mapSliceValue,
+		"m-p-s-p-e":         mapSliceValue,
+		"m-p-p-s-p-e":       mapSliceValue,
+		"m-s-p-p-e":         mapSliceValue,
+		"m-p-s-p-p-e":       mapSliceValue,
+		"m-p-p-s-p-p-e":     mapSliceValue,
+		"m-a-e":             mapArrayValue,
+		"m-p-a-e":           mapArrayValue,
+		"m-p-p-a-e":         mapArrayValue,
+		"m-a-p-e":           mapArrayValue,
+		"m-p-a-p-e":         mapArrayValue,
+		"m-p-p-a-p-e":       mapArrayValue,
+		"m-a-p-p-e":         mapArrayValue,
+		"m-p-a-p-p-e":       mapArrayValue,
+		"m-p-p-a-p-p-e":     mapArrayValue,
+		"m-s-e-p":           mapSliceValue,
+		"m-p-s-e-p":         mapSliceValue,
+		"m-p-p-s-e-p":       mapSliceValue,
+		"m-s-p-e-p":         mapSliceValue,
+		"m-p-s-p-e-p":       mapSliceValue,
+		"m-p-p-s-p-e-p":     mapSliceValue,
+		"m-s-p-p-e-p":       mapSliceValue,
+		"m-p-s-p-p-e-p":     mapSliceValue,
+		"m-p-p-s-p-p-e-p":   mapSliceValue,
+		"m-a-e-p":           mapArrayValue,
+		"m-p-a-e-p":         mapArrayValue,
+		"m-p-p-a-e-p":       mapArrayValue,
+		"m-a-p-e-p":         mapArrayValue,
+		"m-p-a-p-e-p":       mapArrayValue,
+		"m-p-p-a-p-e-p":     mapArrayValue,
+		"m-a-p-p-e-p":       mapArrayValue,
+		"m-p-a-p-p-e-p":     mapArrayValue,
+		"m-p-p-a-p-p-e-p":   mapArrayValue,
+		"m-s-e-p-p":         mapSliceValue,
+		"m-p-s-e-p-p":       mapSliceValue,
+		"m-p-p-s-e-p-p":     mapSliceValue,
+		"m-s-p-e-p-p":       mapSliceValue,
+		"m-p-s-p-e-p-p":     mapSliceValue,
+		"m-p-p-s-p-e-p-p":   mapSliceValue,
+		"m-s-p-p-e-p-p":     mapSliceValue,
+		"m-p-s-p-p-e-p-p":   mapSliceValue,
+		"m-p-p-s-p-p-e-p-p": mapSliceValue,
+		"m-a-e-p-p":         mapArrayValue,
+		"m-p-a-e-p-p":       mapArrayValue,
+		"m-p-p-a-e-p-p":     mapArrayValue,
+		"m-a-p-e-p-p":       mapArrayValue,
+		"m-p-a-p-e-p-p":     mapArrayValue,
+		"m-p-p-a-p-e-p-p":   mapArrayValue,
+		"m-a-p-p-e-p-p":     mapArrayValue,
+		"m-p-a-p-p-e-p-p":   mapArrayValue,
+		"m-p-p-a-p-p-e-p-p": mapArrayValue,
 	}
 
 	if !reflect.DeepEqual(target, expected) {
 		t.Fatalf("failed: \nexpected: %#v\nresult: %#v", expected, target)
+	}
+
+	var reverse SourceParent
+
+	if err := Decode(target, &reverse); err != nil {
+		t.Fatalf("got error: %s", err)
+	}
+
+	if !reflect.DeepEqual(source, reverse) {
+		t.Fatalf("failed: \nexpected: %#v\nresult: %#v", source, reverse)
+	}
+}
+
+func TestDecode_structArrayDeepMapIndirect(t *testing.T) {
+	type SourceChild struct {
+		String string `mapstructure:"field"`
+	}
+
+	type SourceParent struct {
+		SE        []SourceChild                   `mapstructure:"s-e,deep,indirect"`
+		SPE       *[]SourceChild                  `mapstructure:"s-p-e,deep,indirect"`
+		SPPE      **[]SourceChild                 `mapstructure:"s-p-p-e,deep,indirect"`
+		SEP       []*SourceChild                  `mapstructure:"s-e-p,deep,indirect"`
+		SPEP      *[]*SourceChild                 `mapstructure:"s-p-e-p,deep,indirect"`
+		SPPEP     **[]*SourceChild                `mapstructure:"s-p-p-e-p,deep,indirect"`
+		SEPP      []**SourceChild                 `mapstructure:"s-e-p-p,deep,indirect"`
+		SPEPP     *[]**SourceChild                `mapstructure:"s-p-e-p-p,deep,indirect"`
+		SPPEPP    **[]**SourceChild               `mapstructure:"s-p-p-e-p-p,deep,indirect"`
+		AE        [1]SourceChild                  `mapstructure:"a-e,deep,indirect"`
+		APE       *[1]SourceChild                 `mapstructure:"a-p-e,deep,indirect"`
+		APPE      **[1]SourceChild                `mapstructure:"a-p-p-e,deep,indirect"`
+		AEP       [1]*SourceChild                 `mapstructure:"a-e-p,deep,indirect"`
+		APEP      *[1]*SourceChild                `mapstructure:"a-p-e-p,deep,indirect"`
+		APPEP     **[1]*SourceChild               `mapstructure:"a-p-p-e-p,deep,indirect"`
+		AEPP      [1]**SourceChild                `mapstructure:"a-e-p-p,deep,indirect"`
+		APEPP     *[1]**SourceChild               `mapstructure:"a-p-e-p-p,deep,indirect"`
+		APPEPP    **[1]**SourceChild              `mapstructure:"a-p-p-e-p-p,deep,indirect"`
+		ME        map[string]SourceChild          `mapstructure:"m-e,deep,indirect"`
+		MPE       *map[string]SourceChild         `mapstructure:"m-p-e,deep,indirect"`
+		MPPE      **map[string]SourceChild        `mapstructure:"m-p-p-e,deep,indirect"`
+		MEP       map[string]*SourceChild         `mapstructure:"m-e-p,deep,indirect"`
+		MPEP      *map[string]*SourceChild        `mapstructure:"m-p-e-p,deep,indirect"`
+		MPPEP     **map[string]*SourceChild       `mapstructure:"m-p-p-e-p,deep,indirect"`
+		MEPP      map[string]**SourceChild        `mapstructure:"m-e-p-p,deep,indirect"`
+		MPEPP     *map[string]**SourceChild       `mapstructure:"m-p-e-p-p,deep,indirect"`
+		MPPEPP    **map[string]**SourceChild      `mapstructure:"m-p-p-e-p-p,deep,indirect"`
+		MSE       map[string][]SourceChild        `mapstructure:"m-s-e,deep,indirect"`
+		MPSE      *map[string][]SourceChild       `mapstructure:"m-p-s-e,deep,indirect"`
+		MPPSE     **map[string][]SourceChild      `mapstructure:"m-p-p-s-e,deep,indirect"`
+		MSPE      map[string]*[]SourceChild       `mapstructure:"m-s-p-e,deep,indirect"`
+		MPSPE     *map[string]*[]SourceChild      `mapstructure:"m-p-s-p-e,deep,indirect"`
+		MPPSPE    **map[string]*[]SourceChild     `mapstructure:"m-p-p-s-p-e,deep,indirect"`
+		MSPPE     map[string]**[]SourceChild      `mapstructure:"m-s-p-p-e,deep,indirect"`
+		MPSPPE    *map[string]**[]SourceChild     `mapstructure:"m-p-s-p-p-e,deep,indirect"`
+		MPPSPPE   **map[string]**[]SourceChild    `mapstructure:"m-p-p-s-p-p-e,deep,indirect"`
+		MAE       map[string][1]SourceChild       `mapstructure:"m-a-e,deep,indirect"`
+		MPAE      *map[string][1]SourceChild      `mapstructure:"m-p-a-e,deep,indirect"`
+		MPPAE     **map[string][1]SourceChild     `mapstructure:"m-p-p-a-e,deep,indirect"`
+		MAPE      map[string]*[1]SourceChild      `mapstructure:"m-a-p-e,deep,indirect"`
+		MPAPE     *map[string]*[1]SourceChild     `mapstructure:"m-p-a-p-e,deep,indirect"`
+		MPPAPE    **map[string]*[1]SourceChild    `mapstructure:"m-p-p-a-p-e,deep,indirect"`
+		MAPPE     map[string]**[1]SourceChild     `mapstructure:"m-a-p-p-e,deep,indirect"`
+		MPAPPE    *map[string]**[1]SourceChild    `mapstructure:"m-p-a-p-p-e,deep,indirect"`
+		MPPAPPE   **map[string]**[1]SourceChild   `mapstructure:"m-p-p-a-p-p-e,deep,indirect"`
+		MSEP      map[string][]*SourceChild       `mapstructure:"m-s-e-p,deep,indirect"`
+		MPSEP     *map[string][]*SourceChild      `mapstructure:"m-p-s-e-p,deep,indirect"`
+		MPPSEP    **map[string][]*SourceChild     `mapstructure:"m-p-p-s-e-p,deep,indirect"`
+		MSPEP     map[string]*[]*SourceChild      `mapstructure:"m-s-p-e-p,deep,indirect"`
+		MPSPEP    *map[string]*[]*SourceChild     `mapstructure:"m-p-s-p-e-p,deep,indirect"`
+		MPPSPEP   **map[string]*[]*SourceChild    `mapstructure:"m-p-p-s-p-e-p,deep,indirect"`
+		MSPPEP    map[string]**[]*SourceChild     `mapstructure:"m-s-p-p-e-p,deep,indirect"`
+		MPSPPEP   *map[string]**[]*SourceChild    `mapstructure:"m-p-s-p-p-e-p,deep,indirect"`
+		MPPSPPEP  **map[string]**[]*SourceChild   `mapstructure:"m-p-p-s-p-p-e-p,deep,indirect"`
+		MAEP      map[string][1]*SourceChild      `mapstructure:"m-a-e-p,deep,indirect"`
+		MPAEP     *map[string][1]*SourceChild     `mapstructure:"m-p-a-e-p,deep,indirect"`
+		MPPAEP    **map[string][1]*SourceChild    `mapstructure:"m-p-p-a-e-p,deep,indirect"`
+		MAPEP     map[string]*[1]*SourceChild     `mapstructure:"m-a-p-e-p,deep,indirect"`
+		MPAPEP    *map[string]*[1]*SourceChild    `mapstructure:"m-p-a-p-e-p,deep,indirect"`
+		MPPAPEP   **map[string]*[1]*SourceChild   `mapstructure:"m-p-p-a-p-e-p,deep,indirect"`
+		MAPPEP    map[string]**[1]*SourceChild    `mapstructure:"m-a-p-p-e-p,deep,indirect"`
+		MPAPPEP   *map[string]**[1]*SourceChild   `mapstructure:"m-p-a-p-p-e-p,deep,indirect"`
+		MPPAPPEP  **map[string]**[1]*SourceChild  `mapstructure:"m-p-p-a-p-p-e-p,deep,indirect"`
+		MSEPP     map[string][]**SourceChild      `mapstructure:"m-s-e-p-p,deep,indirect"`
+		MPSEPP    *map[string][]**SourceChild     `mapstructure:"m-p-s-e-p-p,deep,indirect"`
+		MPPSEPP   **map[string][]**SourceChild    `mapstructure:"m-p-p-s-e-p-p,deep,indirect"`
+		MSPEPP    map[string]*[]**SourceChild     `mapstructure:"m-s-p-e-p-p,deep,indirect"`
+		MPSPEPP   *map[string]*[]**SourceChild    `mapstructure:"m-p-s-p-e-p-p,deep,indirect"`
+		MPPSPEPP  **map[string]*[]**SourceChild   `mapstructure:"m-p-p-s-p-e-p-p,deep,indirect"`
+		MSPPEPP   map[string]**[]**SourceChild    `mapstructure:"m-s-p-p-e-p-p,deep,indirect"`
+		MPSPPEPP  *map[string]**[]**SourceChild   `mapstructure:"m-p-s-p-p-e-p-p,deep,indirect"`
+		MPPSPPEPP **map[string]**[]**SourceChild  `mapstructure:"m-p-p-s-p-p-e-p-p,deep,indirect"`
+		MAEPP     map[string][1]**SourceChild     `mapstructure:"m-a-e-p-p,deep,indirect"`
+		MPAEPP    *map[string][1]**SourceChild    `mapstructure:"m-p-a-e-p-p,deep,indirect"`
+		MPPAEPP   **map[string][1]**SourceChild   `mapstructure:"m-p-p-a-e-p-p,deep,indirect"`
+		MAPEPP    map[string]*[1]**SourceChild    `mapstructure:"m-a-p-e-p-p,deep,indirect"`
+		MPAPEPP   *map[string]*[1]**SourceChild   `mapstructure:"m-p-a-p-e-p-p,deep,indirect"`
+		MPPAPEPP  **map[string]*[1]**SourceChild  `mapstructure:"m-p-p-a-p-e-p-p,deep,indirect"`
+		MAPPEPP   map[string]**[1]**SourceChild   `mapstructure:"m-a-p-p-e-p-p,deep,indirect"`
+		MPAPPEPP  *map[string]**[1]**SourceChild  `mapstructure:"m-p-a-p-p-e-p-p,deep,indirect"`
+		MPPAPPEPP **map[string]**[1]**SourceChild `mapstructure:"m-p-p-a-p-p-e-p-p,deep,indirect"`
+	}
+
+	e := SourceChild{String: "el"}
+	ep := &e
+	epp := &ep
+
+	se := []SourceChild{e}
+	spe := &se
+	sppe := &spe
+
+	sep := []*SourceChild{ep}
+	spep := &sep
+	sppep := &spep
+
+	sepp := []**SourceChild{epp}
+	spepp := &sepp
+	sppepp := &spepp
+
+	ae := [1]SourceChild{e}
+	ape := &ae
+	appe := &ape
+
+	aep := [1]*SourceChild{ep}
+	apep := &aep
+	appep := &apep
+
+	aepp := [1]**SourceChild{epp}
+	apepp := &aepp
+	appepp := &apepp
+
+	me := map[string]SourceChild{"foo": e}
+	mpe := &me
+	mppe := &mpe
+
+	mep := map[string]*SourceChild{"foo": ep}
+	mpep := &mep
+	mppep := &mpep
+
+	mepp := map[string]**SourceChild{"foo": epp}
+	mpepp := &mepp
+	mppepp := &mpepp
+
+	mse := map[string][]SourceChild{"foo": se}
+	mpse := &mse
+	mppse := &mpse
+
+	mspe := map[string]*[]SourceChild{"foo": spe}
+	mpspe := &mspe
+	mppspe := &mpspe
+
+	msppe := map[string]**[]SourceChild{"foo": sppe}
+	mpsppe := &msppe
+	mppsppe := &mpsppe
+
+	mae := map[string][1]SourceChild{"foo": ae}
+	mpae := &mae
+	mppae := &mpae
+
+	mape := map[string]*[1]SourceChild{"foo": ape}
+	mpape := &mape
+	mppape := &mpape
+
+	mappe := map[string]**[1]SourceChild{"foo": appe}
+	mpappe := &mappe
+	mppappe := &mpappe
+
+	msep := map[string][]*SourceChild{"foo": sep}
+	mpsep := &msep
+	mppsep := &mpsep
+
+	mspep := map[string]*[]*SourceChild{"foo": spep}
+	mpspep := &mspep
+	mppspep := &mpspep
+
+	msppep := map[string]**[]*SourceChild{"foo": sppep}
+	mpsppep := &msppep
+	mppsppep := &mpsppep
+
+	maep := map[string][1]*SourceChild{"foo": aep}
+	mpaep := &maep
+	mppaep := &mpaep
+
+	mapep := map[string]*[1]*SourceChild{"foo": apep}
+	mpapep := &mapep
+	mppapep := &mpapep
+
+	mappep := map[string]**[1]*SourceChild{"foo": appep}
+	mpappep := &mappep
+	mppappep := &mpappep
+
+	msepp := map[string][]**SourceChild{"foo": sepp}
+	mpsepp := &msepp
+	mppsepp := &mpsepp
+
+	mspepp := map[string]*[]**SourceChild{"foo": spepp}
+	mpspepp := &mspepp
+	mppspepp := &mpspepp
+
+	msppepp := map[string]**[]**SourceChild{"foo": sppepp}
+	mpsppepp := &msppepp
+	mppsppepp := &mpsppepp
+
+	maepp := map[string][1]**SourceChild{"foo": aepp}
+	mpaepp := &maepp
+	mppaepp := &mpaepp
+
+	mapepp := map[string]*[1]**SourceChild{"foo": apepp}
+	mpapepp := &mapepp
+	mppapepp := &mpapepp
+
+	mappepp := map[string]**[1]**SourceChild{"foo": appepp}
+	mpappepp := &mappepp
+	mppappepp := &mpappepp
+
+	var target map[string]any
+
+	source := SourceParent{
+		SE:        se,
+		SPE:       spe,
+		SPPE:      sppe,
+		SEP:       sep,
+		SPEP:      spep,
+		SPPEP:     sppep,
+		SEPP:      sepp,
+		SPEPP:     spepp,
+		SPPEPP:    sppepp,
+		AE:        ae,
+		APE:       ape,
+		APPE:      appe,
+		AEP:       aep,
+		APEP:      apep,
+		APPEP:     appep,
+		AEPP:      aepp,
+		APEPP:     apepp,
+		APPEPP:    appepp,
+		ME:        me,
+		MPE:       mpe,
+		MPPE:      mppe,
+		MEP:       mep,
+		MPEP:      mpep,
+		MPPEP:     mppep,
+		MEPP:      mepp,
+		MPEPP:     mpepp,
+		MPPEPP:    mppepp,
+		MSE:       mse,
+		MPSE:      mpse,
+		MPPSE:     mppse,
+		MSPE:      mspe,
+		MPSPE:     mpspe,
+		MPPSPE:    mppspe,
+		MSPPE:     msppe,
+		MPSPPE:    mpsppe,
+		MPPSPPE:   mppsppe,
+		MAE:       mae,
+		MPAE:      mpae,
+		MPPAE:     mppae,
+		MAPE:      mape,
+		MPAPE:     mpape,
+		MPPAPE:    mppape,
+		MAPPE:     mappe,
+		MPAPPE:    mpappe,
+		MPPAPPE:   mppappe,
+		MSEP:      msep,
+		MPSEP:     mpsep,
+		MPPSEP:    mppsep,
+		MSPEP:     mspep,
+		MPSPEP:    mpspep,
+		MPPSPEP:   mppspep,
+		MSPPEP:    msppep,
+		MPSPPEP:   mpsppep,
+		MPPSPPEP:  mppsppep,
+		MAEP:      maep,
+		MPAEP:     mpaep,
+		MPPAEP:    mppaep,
+		MAPEP:     mapep,
+		MPAPEP:    mpapep,
+		MPPAPEP:   mppapep,
+		MAPPEP:    mappep,
+		MPAPPEP:   mpappep,
+		MPPAPPEP:  mppappep,
+		MSEPP:     msepp,
+		MPSEPP:    mpsepp,
+		MPPSEPP:   mppsepp,
+		MSPEPP:    mspepp,
+		MPSPEPP:   mpspepp,
+		MPPSPEPP:  mppspepp,
+		MSPPEPP:   msppepp,
+		MPSPPEPP:  mpsppepp,
+		MPPSPPEPP: mppsppepp,
+		MAEPP:     maepp,
+		MPAEPP:    mpaepp,
+		MPPAEPP:   mppaepp,
+		MAPEPP:    mapepp,
+		MPAPEPP:   mpapepp,
+		MPPAPEPP:  mppapepp,
+		MAPPEPP:   mappepp,
+		MPAPPEPP:  mpappepp,
+		MPPAPPEPP: mppappepp,
+	}
+
+	if err := Decode(source, &target); err != nil {
+		t.Fatalf("got error: %s", err)
+	}
+
+	sliceValue := []any{map[string]any{"field": "el"}}
+	mapValue := map[string]any{"foo": map[string]any{"field": "el"}}
+	mapSliceValue := map[string]any{"foo": []any{map[string]any{"field": "el"}}}
+
+	expected := map[string]any{
+		"s-e":               sliceValue,
+		"s-p-e":             sliceValue,
+		"s-p-p-e":           sliceValue,
+		"s-e-p":             sliceValue,
+		"s-p-e-p":           sliceValue,
+		"s-p-p-e-p":         sliceValue,
+		"s-e-p-p":           sliceValue,
+		"s-p-e-p-p":         sliceValue,
+		"s-p-p-e-p-p":       sliceValue,
+		"a-e":               sliceValue,
+		"a-p-e":             sliceValue,
+		"a-p-p-e":           sliceValue,
+		"a-e-p":             sliceValue,
+		"a-p-e-p":           sliceValue,
+		"a-p-p-e-p":         sliceValue,
+		"a-e-p-p":           sliceValue,
+		"a-p-e-p-p":         sliceValue,
+		"a-p-p-e-p-p":       sliceValue,
+		"m-e":               mapValue,
+		"m-p-e":             mapValue,
+		"m-p-p-e":           mapValue,
+		"m-e-p":             mapValue,
+		"m-p-e-p":           mapValue,
+		"m-p-p-e-p":         mapValue,
+		"m-e-p-p":           mapValue,
+		"m-p-e-p-p":         mapValue,
+		"m-p-p-e-p-p":       mapValue,
+		"m-s-e":             mapSliceValue,
+		"m-p-s-e":           mapSliceValue,
+		"m-p-p-s-e":         mapSliceValue,
+		"m-s-p-e":           mapSliceValue,
+		"m-p-s-p-e":         mapSliceValue,
+		"m-p-p-s-p-e":       mapSliceValue,
+		"m-s-p-p-e":         mapSliceValue,
+		"m-p-s-p-p-e":       mapSliceValue,
+		"m-p-p-s-p-p-e":     mapSliceValue,
+		"m-a-e":             mapSliceValue,
+		"m-p-a-e":           mapSliceValue,
+		"m-p-p-a-e":         mapSliceValue,
+		"m-a-p-e":           mapSliceValue,
+		"m-p-a-p-e":         mapSliceValue,
+		"m-p-p-a-p-e":       mapSliceValue,
+		"m-a-p-p-e":         mapSliceValue,
+		"m-p-a-p-p-e":       mapSliceValue,
+		"m-p-p-a-p-p-e":     mapSliceValue,
+		"m-s-e-p":           mapSliceValue,
+		"m-p-s-e-p":         mapSliceValue,
+		"m-p-p-s-e-p":       mapSliceValue,
+		"m-s-p-e-p":         mapSliceValue,
+		"m-p-s-p-e-p":       mapSliceValue,
+		"m-p-p-s-p-e-p":     mapSliceValue,
+		"m-s-p-p-e-p":       mapSliceValue,
+		"m-p-s-p-p-e-p":     mapSliceValue,
+		"m-p-p-s-p-p-e-p":   mapSliceValue,
+		"m-a-e-p":           mapSliceValue,
+		"m-p-a-e-p":         mapSliceValue,
+		"m-p-p-a-e-p":       mapSliceValue,
+		"m-a-p-e-p":         mapSliceValue,
+		"m-p-a-p-e-p":       mapSliceValue,
+		"m-p-p-a-p-e-p":     mapSliceValue,
+		"m-a-p-p-e-p":       mapSliceValue,
+		"m-p-a-p-p-e-p":     mapSliceValue,
+		"m-p-p-a-p-p-e-p":   mapSliceValue,
+		"m-s-e-p-p":         mapSliceValue,
+		"m-p-s-e-p-p":       mapSliceValue,
+		"m-p-p-s-e-p-p":     mapSliceValue,
+		"m-s-p-e-p-p":       mapSliceValue,
+		"m-p-s-p-e-p-p":     mapSliceValue,
+		"m-p-p-s-p-e-p-p":   mapSliceValue,
+		"m-s-p-p-e-p-p":     mapSliceValue,
+		"m-p-s-p-p-e-p-p":   mapSliceValue,
+		"m-p-p-s-p-p-e-p-p": mapSliceValue,
+		"m-a-e-p-p":         mapSliceValue,
+		"m-p-a-e-p-p":       mapSliceValue,
+		"m-p-p-a-e-p-p":     mapSliceValue,
+		"m-a-p-e-p-p":       mapSliceValue,
+		"m-p-a-p-e-p-p":     mapSliceValue,
+		"m-p-p-a-p-e-p-p":   mapSliceValue,
+		"m-a-p-p-e-p-p":     mapSliceValue,
+		"m-p-a-p-p-e-p-p":   mapSliceValue,
+		"m-p-p-a-p-p-e-p-p": mapSliceValue,
+	}
+
+	if !reflect.DeepEqual(target, expected) {
+		t.Fatalf("failed: \nexpected: %#v\nresult: %#v", expected, target)
+	}
+
+	var reverse SourceParent
+
+	if err := Decode(target, &reverse); err != nil {
+		t.Fatalf("got error: %s", err)
+	}
+
+	if !reflect.DeepEqual(source, reverse) {
+		t.Fatalf("failed: \nexpected: %#v\nresult: %#v", source, reverse)
 	}
 }
 
